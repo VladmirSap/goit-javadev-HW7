@@ -3,7 +3,10 @@ package org.example;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,14 +82,14 @@ public class DatabaseQueryService {
         });
     }
 
-
-
     private <T> List<T> executeQuery(Connection connection, String sqlFilePath, Function<ResultSet, T> mapper) {
         List<T> result = new ArrayList<>();
-        try (Statement statement = connection.createStatement()) {
+        String sql = null;
 
-            String sql = readSqlFile(sqlFilePath);
-            try (ResultSet resultSet = statement.executeQuery(sql)) {
+        try {
+            sql = readSqlFile(sqlFilePath);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                 ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     T mappedResult = mapper.apply(resultSet);
                     if (mappedResult != null) {
@@ -97,6 +100,8 @@ public class DatabaseQueryService {
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
+
         return result;
     }
 }
+

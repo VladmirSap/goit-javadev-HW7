@@ -4,14 +4,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.ResultSet;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class DatabaseInitService {
 
     public static void main(String[] args) {
-
         DataBase database = DataBase.getInstance();
         Connection connection = database.getConnection();
 
@@ -37,8 +35,15 @@ public class DatabaseInitService {
             }
         }
 
-        try (Statement statement = connection.createStatement()) {
-            statement.execute(sql.toString());
+        // Розділімо SQL запити, якщо їх декілька
+        String[] sqlStatements = sql.toString().split(";"); // Розділяємо за крапкою з комою
+
+        for (String statement : sqlStatements) {
+            if (!statement.trim().isEmpty()) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement(statement.trim())) {
+                    preparedStatement.execute();
+                }
+            }
         }
     }
 

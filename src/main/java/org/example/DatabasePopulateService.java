@@ -4,12 +4,11 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class DatabasePopulateService {
     public static void main(String[] args) {
-
         DataBase database = DataBase.getInstance();
         Connection connection = database.getConnection();
 
@@ -25,7 +24,7 @@ public class DatabasePopulateService {
         }
     }
 
-   private static void executeSqlFile(Connection connection, String filePath) throws IOException, SQLException {
+    private static void executeSqlFile(Connection connection, String filePath) throws IOException, SQLException {
         StringBuilder sql = new StringBuilder();
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
@@ -35,8 +34,15 @@ public class DatabasePopulateService {
             }
         }
 
-        try (Statement statement = connection.createStatement()) {
-            statement.execute(sql.toString());
+        String[] sqlStatements = sql.toString().split(";"); // Розділяємо за крапкою з комою
+
+        for (String statement : sqlStatements) {
+            if (!statement.trim().isEmpty()) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement(statement.trim())) {
+                    preparedStatement.execute();
+                }
+            }
         }
     }
+
 }

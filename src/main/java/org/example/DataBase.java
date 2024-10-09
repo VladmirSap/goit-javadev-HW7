@@ -12,7 +12,7 @@ public class DataBase {
     private static final String USER = "sa";
     private static final String PASSWORD = "";
 
-    DataBase() {
+    public DataBase() {
         try {
             connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
             System.out.println("Connected to database.");
@@ -31,5 +31,5 @@ public class DataBase {
     public Connection getConnection() {
         return connection;
     }
-
 }
+
